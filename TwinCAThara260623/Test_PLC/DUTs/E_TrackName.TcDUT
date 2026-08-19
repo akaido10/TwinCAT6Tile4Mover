@@ -1,0 +1,20 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1">
+  <DUT Name="E_TrackName" Id="{28f903fa-341e-4dad-a1a0-3525a2254919}">
+    <Declaration><![CDATA[{attribute 'qualified_only'}
+{attribute 'strict'}
+{attribute 'to_string'}
+TYPE E_TrackName :
+(
+	Wait :=0,
+	ToFillB,
+	ToFillA,
+	ToCapB,
+	ToCapA,
+	EndA,
+	EndB
+);
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

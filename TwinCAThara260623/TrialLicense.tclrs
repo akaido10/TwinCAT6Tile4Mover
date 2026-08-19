@@ -1,0 +1,39 @@
+<?xml version="1.0"?>
+<TcLicenseInfo xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.beckhoff.com/schemas/2011/11/TcLicenseInfo">
+	<LicenseInfo>
+		<SystemId>{1D993DC2-E447-CC3D-D73E-A96EF01DD1DE}</SystemId>
+		<IssueTime>2026-08-19T05:30:00</IssueTime>
+		<ExpireTime>2026-08-27T00:00:00</ExpireTime>
+		<LicenseKey>370b9e2181e7a6bd0f6a2562765cc628de4e06c20cfdd03096997bf7c19caf2b9e03f5ea2d0d6b11c5b4238e9677788af334beb7f1edece8eb9040d70582694ae63ad0d35a7c08d2bd385305df35eb2464f27979cb064dcc1b6def909a38149c64eca597035c35d889d5b9e22a1c87cafc9e646a9ee0a9bc8dd38907d4aa884027bb1c32980a24aa68f985c3ed80b88beb8c26d6475d8dd0af0d11488c98c10e286a2b5f9c1740d51775fb4c61370f9399ee44721c4aa5c4ef389fb036b068c5e36a9c373f0d054efbbdfaf5d14b5592249a2f8abbdc5340005ed0ab0f668ea64efc024f75fc200cfe227ef9f1c8e30df98eae6348ada1061eaa76d2d8da6f83</LicenseKey>
+		<License>
+			<LicenseId>{C2F58FAE-EB3E-4252-A3D4-E912569E6EFC}</LicenseId>
+			<Name>TC3 Planar Motion Base</Name>
+			<OrderNo>TF5430</OrderNo>
+		</License>
+		<License>
+			<LicenseId>{C13CAEC7-1F41-4491-935E-FF6254005C74}</LicenseId>
+			<Name>TC3 Physics Base</Name>
+			<OrderNo>TF5440</OrderNo>
+		</License>
+		<License>
+			<LicenseId>{C362DA3A-1771-4019-9AF9-F39972E4A76D}</LicenseId>
+			<Name>TC3 XPlanar Technology</Name>
+			<OrderNo>TF5890</OrderNo>
+		</License>
+		<License>
+			<LicenseId>{577D032C-921A-4978-B163-B35640A4CFE6}</LicenseId>
+			<Name>TC3 MC3 Axis</Name>
+			<Instances>10</Instances>
+		</License>
+		<License>
+			<LicenseId>{C93D4D9B-FB43-43A4-8D9E-5F885F636D83}</LicenseId>
+			<Name>TC3 MC3 Multi Vendor</Name>
+			<Instances>5</Instances>
+		</License>
+		<License>
+			<LicenseId>{5CFA659E-6740-4567-A7FB-C2676C278AAE}</LicenseId>
+			<Name>TC3 MC3 Base</Name>
+			<OrderNo>TF5500</OrderNo>
+		</License>
+	</LicenseInfo>
+</TcLicenseInfo>

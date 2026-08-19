@@ -1,0 +1,21 @@
+## --- TwinCAT 3 Specific ---
+_CompileInfo/
+_Boot/
+*_Boot/
+_Run/
+*.compileinfo
+*.tpy
+*.tpy_old
+*.bak
+*.tmp
+
+
+*.user
+*.suo
+.vs/
+
+
+bin/
+obj/
+[Dd]ebug/
+[Rr]elease/
