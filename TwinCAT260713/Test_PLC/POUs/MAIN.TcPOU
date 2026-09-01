@@ -1,0 +1,1140 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1">
+  <POU Name="MAIN" Id="{cbb8b90c-b5c6-4ff5-b9ae-e1017685d807}" SpecialFunc="None">
+    <Declaration><![CDATA[PROGRAM MAIN
+VAR
+	seqEnableM       :ARRAY[0..gvl.MAX_mover]OF UINT;
+	enableM          :ARRAY[0..gvl.MAX_mover]OF BOOL;
+	ResetM           :ARRAY[0..gvl.MAX_mover]OF BOOL;
+	seqResetM        :ARRAY[0..gvl.MAX_mover]OF UINT;
+	HaltM            :ARRAY[0..gvl.MAX_mover]OF BOOL;
+	seqHaltM         :ARRAY[0..gvl.MAX_mover]OF UINT;
+	seqdisableM      :ARRAY[0..gvl.MAX_mover]OF UINT;
+	disableM         :ARRAY[0..gvl.MAX_mover]OF BOOL;
+	seqMovexM        :ARRAY[0..gvl.MAX_mover]OF UINT;
+	seqMoveX_2m      :UINT;
+	seqMoveAM        :ARRAY[0..gvl.MAX_mover]OF UINT;
+	seqMovex1M       :ARRAY[0..gvl.MAX_mover]OF UINT;
+	moveXM           :ARRAY[0..gvl.MAX_mover]OF BOOL;
+	moveAM           :ARRAY[0..gvl.MAX_mover]OF BOOL;
+	moveX1M          :ARRAY[0..gvl.MAX_mover]OF BOOL;
+	MoveX_2m         :BOOL;
+	moveZM           :ARRAY[0..gvl.MAX_mover]OF BOOL;
+	moveCM           :ARRAY[0..gvl.MAX_mover]OF BOOL;
+	positionTargetX  :ARRAY[0..gvl.MAX_mover]OF LREAL :=[(gvl.MAX_MOVER+1)(120)];
+	positionTargetA  :ARRAY[0..gvl.MAX_mover]OF LREAL :=[(gvl.MAX_MOVER+1)(0)];
+	positionTargetX1 :ARRAY[0..gvl.MAX_mover]OF LREAL :=[(gvl.MAX_MOVER+1)(140)];
+	seqMoveYM        :ARRAY[0..gvl.MAX_mover]OF UINT;
+	seqMoveBM        :ARRAY[0..gvl.MAX_mover]OF UINT;
+	seqMoveCM        :ARRAY[0..gvl.MAX_mover]OF UINT;
+	seqMoveZM        :ARRAY[0..gvl.MAX_mover]OF UINT;
+	seqMoveY1M       :ARRAY[0..gvl.MAX_mover]OF UINT;
+	seqJoinTrack     :ARRAY[0..gvl.MAX_mover]OF UINT;
+	seqLeaveTrack    :ARRAY[0..gvl.MAX_mover]OF UINT;
+	seqMoveOnTrack   :ARRAY[0..gvl.MAX_mover]OF UINT;
+	
+	JoinTrack        :ARRAY[0..gvl.MAX_mover]OF BOOL;
+	LeaveTrack       :ARRAY[0..gvl.MAX_mover]OF BOOL;
+	MoveOnTrack      :ARRAY[0..gvl.MAX_mover]OF BOOL;
+	moveYM           :ARRAY[0..gvl.MAX_mover]OF BOOL;
+	moveBM           :ARRAY[0..gvl.MAX_mover]OF BOOL;
+	moveY1M          :ARRAY[0..gvl.MAX_mover]OF BOOL;
+	positionTargetY  :ARRAY[0..gvl.MAX_mover]OF LREAL :=[(gvl.MAX_MOVER+1)(120)];
+	positionTargetB  :ARRAY[0..gvl.MAX_mover]OF LREAL :=[(gvl.MAX_MOVER+1)(0)];
+	positionTargetC  :ARRAY[0..gvl.MAX_mover]OF LREAL :=[(gvl.MAX_MOVER+1)(0)];
+	positionTargetZ  :ARRAY[0..gvl.MAX_mover]OF LREAL :=[(gvl.MAX_MOVER+1)(5)];
+	positionTargetY1 :ARRAY[0..gvl.MAX_mover]OF LREAL :=[(gvl.MAX_MOVER+1)(140)];
+	velocity_xy      :ARRAY[0..gvl.MAX_mover]OF LREAL :=[(gvl.MAX_MOVER+1)(50)];
+	velocity_c       :ARRAY[0..gvl.MAX_mover]OF LREAL :=[(gvl.MAX_MOVER+1)(500)];
+	velocity_ZAB     :ARRAY[0..gvl.MAX_mover]OF LREAL :=[(gvl.MAX_MOVER+1)(10)];
+	Acc_xy     		 :ARRAY[0..gvl.MAX_mover]OF LREAL :=[(gvl.MAX_MOVER+1)(1000)];
+	Jark_xy    		 :ARRAY[0..gvl.MAX_mover]OF LREAL :=[(gvl.MAX_MOVER+1)(1000)];
+	PositionXYC      :ARRAY[0..gvl.MAX_mover]OF PositionXYC;
+	numberTrack      :ARRAY[0..gvl.MAX_mover]OF  UINT := [0,1,6,5];
+	distanceTrack    :ARRAY[0..gvl.MAX_mover]OF LREAL;
+	seqEnableTrack  :UINT;
+	seqEnableUtility :UINT;
+	seqDetectIdBumper:UINT;
+	EnableTrack     :BOOL:=TRUE;
+	EnableUtility    :BOOL := TRUE;
+	DetectIdBumper  :BOOL;
+	resultSettCoordmoverCommunicationCmd:BOOL;
+	MoverComStatus 	:MoverCommunicationStatus;
+	btnMover        :STRING;
+	stMoverDetecionStatus:MoverDetectionStatus;
+	Timer             :TON;
+	estmatedMoverPower:POINTER TO LREAL;
+	OutputForce       :POINTER TO MoverVector;
+	
+	i,j: INT; //Mover
+	k: INT; //
+	t: INT; //Track
+	
+	seqEnableT: INT;
+	resultIniU: BOOL;
+	
+	bMoverEnable : ARRAY [0..gvl.MAX_MOVER] OF BOOL;
+	bJoinTrackseq: BOOL;
+	bMoveTrackSeq: BOOL;
+	diCountSum: DINT;
+	CountReset: BOOL;
+	TrigSlowStop : F_TRIG;
+	bPtoP_X: BOOL;
+	bX600: BOOL;
+	
+	pSortedMovers	: ARRAY [0..GVL.MAX_MOVER] OF POINTER TO MC_PlanarMover;
+	pTemp			: POINTER TO MC_PlanarMover;
+	pMover_1st,pMover_2nd, pMover_3rd, pMover_4th : POINTER TO MC_PlanarMover;
+	
+	nJoinStep: INT;
+END_VAR
+
+VAR
+	IpXpu            :I_TcIoXPlanarProcessingUnit;
+	FbEnv            :FB_TcIoXPlanarEnvironment;
+	Xpmover          :ARRAY [0..gvl.MAX_MOVER]OF MC_PlanarMover;
+	Xpfeedback       :ARRAY [0..gvl.MAX_mover]OF U_MoverFeedback;
+//	Xpfeedback       :ARRAY [0..gvl.MAX_mover]OF ARRAY [0..gvl.MAX_FEEDBACK]OF MC_Planarfeedback;
+	XpTrack          :ARRAY [0..gvl.MAX_Track]OF MC_PlanarTrack;
+	ConstraintXY    :ARRAY [0..gvl.MAX_mover]OF DynamicConstraint_PathXY;	
+	Constratint_ZABC :ARRAY [0..gvl.MAX_mover]OF DynamicConstraint_Coordinates;
+END_VAR
+
+VAR CONSTANT
+	MAX_MOVER     :UINT:=1;
+	MAX_FEEDBACK  :UINT:=100;
+	MAX_Track     :UINT:=7;
+END_VAR
+
+VAR CONSTANT
+	INIT      :UINT:=0;
+	READY     :UINT:=10;
+	EXECUTE   :UINT:=1;
+	BUSY      :UINT:=2;
+	DONE      :UINT:=3;
+	ERROR     :UINT:=4;
+	ABORT     :UINT:=5;
+	
+	
+END_VAR
+
+VAR //StateTrackMove
+	fbStateTrack : ARRAY [0..gvl.max_mover] OF FB_StateTrackMove; 
+END_VAR
+
+VAR //Keyence IO
+	bSlowStop 		AT %I*	:BOOL;//Sefety PLC
+	//iEipInput 		AT %I*	:ARRAY[0..50] OF INT;//EthernetIP Input
+	//iEipOutput		AT %Q* 	:ARRAY[0..50] OF INT;//EthernetIP Output
+	iEipInput 		AT %I*	:ARRAY[0..50] OF WORD;//EthernetIP Input
+	iEipOutput		AT %Q* 	:ARRAY[0..50] OF WORD;//EthernetIP Output
+	bEipInput		AT %I*	:ARRAY[0..9] OF BOOL;
+	bEipOutput		AT %Q*	:ARRAY[0..9] OF BOOL;
+END_VAR]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[update();//Mover and Track Update
+callEnableT();//Track Enable
+callMoveX_2m();
+callEnableUtility();//fbEnv Init
+//callDetectIdBumper();//Detect ID Bumper
+
+(*
+FOR i:=0 TO gvl.MAX_MOVER DO //Mover
+	callEmergencyStop();
+END_FOR
+*)
+TrigSlowStop(CLK := bSlowStop);
+FOR i:=0 TO gvl.MAX_MOVER DO
+	IF TrigSlowStop.Q THEN
+			IF XpMover[i].MCTOPLC.STD.State = MC.MC_PLANAR_STATE.Enabled THEN
+				XpMover[i].Halt(commandFeedback :=XpFeedback[i].sName.CallEmergencyStop,
+					constraint := ConstraintXY[i]);
+			END_IF
+		RETURN;
+	END_IF
+END_FOR
+
+FOR i:=0 TO gvl.MAX_MOVER DO //Mover
+	callEnable();
+	callReset();
+	callHalt();
+	calldisable();
+	callMoveX();
+	callMoveY();
+	callMoveA();	
+	callMoveB();	
+	callMoveZ();
+	callMoveC();	
+	callJoinTrack();	
+	callLeaveTrack();
+	callMoveOnTrack();	
+
+	
+	fbStateTrack[i](
+	Fbmover:=xpMover[i],
+	fbTrack:=xptrack,
+	bEmergencyStopIn:=bSlowStop);
+	
+END_FOR
+seq_JoinTrack();
+
+IF seqEnableUtility = done THEN
+	estmatedMoverPower:= IpXpu.TcIoMover(2).ScopeAdr.GetEstimatedMoverPower();
+	OutputForce:= IpXpu.TcIoMover(2).ScopeAdr.GetOutputForce();
+END_IF
+
+FOR i :=0 TO gvl.MAX_MOVER DO
+	bMoverEnable[i] := (MAIN.Xpmover[i].MCTOPLC.STD.State = MC_PLANAR_STATE.Enabled);
+END_FOR
+
+IF bPtoP_X THEN
+	IF bX600 THEN
+		positionTargetX[0]:=600;
+	ELSE
+		positionTargetX[0]:=120;
+	END_IF
+END_IF
+
+IF iEipInput[0].0 THEN
+	iEipOutput[0].0:=TRUE;
+	FOR i:=0 TO GVL.MAX_MOVER DO
+	fbStateTrack[i].bMoveState:= TRUE;
+	END_FOR
+END_IF
+
+
+IF iEipInput[0].1 THEN
+	GVL.bstop:= TRUE;
+ELSE
+	GVL.bstop := FALSE;
+END_IF]]></ST>
+    </Implementation>
+    <Action Name="callDetectIdBumper" Id="{70c3437a-0a07-45c5-9094-f3a8a76feb7c}">
+      <Implementation>
+        <ST><![CDATA[(*
+CASE seqDetectIdBumper OF
+	
+INIT:
+	seqDetectIdBumper:=READY;
+		
+READY:
+	DetectIdBumper := (seqEnableUtility = done);
+	IF DetectIdBumper THEN
+		IpXpu.SetStartMoverRedetection();
+        seqDetectIdBumper:=11; 
+	END_IF
+	
+11:
+	stMoverDetecionStatus:= ipXpu.GetMoverDetectionStatus();
+	IF stMoverDetecionStatus= MoverDetectionStatus.DetectionSuccessful THEN
+		seqDetectIdBumper:=12;
+	END_IF
+		
+12:
+	Timer(IN:=TRUE , PT:=T#5S , Q=> , ET=> );
+	IF timer.Q THEN
+		resultSettCoordmoverCommunicationCmd:=IpXpu.SetCoordmoverCommunicationCmd(
+			CoordinatedMoverCommCommand.IdentifyBTNsAndRearrangeMovers);
+		seqDetectIdBumper:=13; 
+	END_IF
+		
+13:
+	MoverComStatus:=IpXpu.TcIoMover(1).GetCommunicationStatus();
+	btnMover:=IpXpu.TcIoMover(1).GetIdentifiedMoverBtn();
+	IF MoverComStatus= MoverCommunicationStatus.CommunicationSuccessful THEN
+	   seqDetectIdBumper:= DONE;
+	ELSIF MoverComStatus= MoverCommunicationStatus.CommunicationFailed THEN
+	   seqDetectIdBumper:= ERROR;
+	END_IF	
+		
+BUSY:
+   (*
+    IF XpFeedback[i][12].Done THEN
+		seqMoveX1M[i]:=DONE;
+    ELSIF Xpfeedback[i][12].Aborted THEN
+		seqMoveX1M[i]:=ABORT;
+	ELSIF Xpfeedback[i][12].Error THEN	
+		seqMoveX1M[i]:=ERROR;
+	END_IF
+		//
+	  *)
+	  
+DONE:
+	IF NOT DetectIdBumper THEN
+	   seqDetectIdBumper:=READY;
+	END_IF
+		
+ERROR:
+	IF NOT DetectIdBumper THEN
+	   seqDetectIdBumper:=READY;
+	END_IF
+		
+ABORT:
+	IF NOT DetectIdBumper THEN
+	   seqDetectIdBumper:=READY;
+	END_IF
+		
+END_CASE
+
+*)]]></ST>
+      </Implementation>
+    </Action>
+    <Action Name="Calldisable" Id="{493a32ca-d4a8-4011-a744-e0f72081a1de}">
+      <Implementation>
+        <ST><![CDATA[CASE seqdisableM[i] OF
+
+INIT:
+	seqdisableM[i]:=READY;
+
+READY:
+	IF disableM [i] THEN
+    	disableM [i] :=FALSE;
+    	Xpmover[i].disable(commandFeedback:=XpFeedBack[i].sName.CallDisable);
+	END_IF
+	 
+BUSY:
+	IF xpFeedback[i].sName.CallDisable.Done THEN
+	   disableM[i]:=FALSE;
+	   seqdisableM[i]:=DONE;
+	END_IF
+
+DONE:
+	IF NOT disableM[i] THEN
+	   seqdisableM[i]:=READY;
+	END_IF
+	
+END_CASE
+	]]></ST>
+      </Implementation>
+    </Action>
+    <Action Name="callEmergencyStop" Id="{4267c873-f626-4d3e-8e86-d435ef378b69}">
+      <Implementation>
+        <ST><![CDATA[(*
+TrigSlowStop(CLK := bSlowStop);
+
+IF TrigSlowStop.Q THEN
+	FOR i:=1 TO GVL.MAX_MOVER DO
+		IF XpMover[i].MCTOPLC.STD.State = MC.MC_PLANAR_STATE.Enabled THEN
+			XpMover[i].Halt(commandFeedback :=XpFeedback[i].sName.CallEmergencyStop,
+				constraint := ConstraintXY[i]);
+		END_IF
+	END_FOR
+	//RETURN;
+END_IF
+
+
+IF NOT bSlowStop THEN //非常停止時にHaltで停止かける
+	FOR i:=1 TO GVL.MAX_MOVER DO
+		IF XpMover[i].MCTOPLC.STD.State = MC.MC_PLANAR_STATE.Enabled THEN
+			XpMover[i].Halt(commandFeedback :=XpFeedback[i].sName.CallEmergencyStop,
+				constraint := ConstraintXY[1]);
+		END_IF
+	END_FOR
+	
+END_IF
+*)]]></ST>
+      </Implementation>
+    </Action>
+    <Action Name="CallEnable" Id="{1fe99755-daa6-4667-8113-3fe2a5df64f1}">
+      <Implementation>
+        <ST><![CDATA[CASE seqEnableM[i] OF
+
+INIT:
+	seqEnableM[i]:=READY;
+
+READY:
+	IF enableM[i]THEN
+		xpMover[i].Enable(commandFeedback:=XpFeedBack[i].sName.CallEnable);
+		seqEnableM[i]:=BUSY;
+	END_IF
+		
+BUSY:
+	IF XpFeedback[i].sName.CallEnable.Done THEN
+		seqEnableM[i]:=DONE;
+    ELSIF Xpfeedback[i].sName.CallEnable.Aborted THEN
+		seqEnableM[i]:=ABORT;
+	ELSIF Xpfeedback[i].sName.CallEnable.Error THEN	
+		seqEnableM[i]:=ERROR;
+	END_IF
+	
+DONE:
+	IF NOT enableM[i] THEN
+	   seqEnableM[i]:=READY;
+	END_IF
+	
+ERROR:
+	IF NOT enableM[i] THEN
+	   seqEnableM[i]:=READY;
+	END_IF
+	
+ABORT:
+	IF NOT enableM[i] THEN
+	   seqenableM[i]:=READY;
+	END_IF
+		   	   
+END_CASE
+]]></ST>
+      </Implementation>
+    </Action>
+    <Action Name="callEnableT" Id="{83748ab0-6ab1-4e68-897a-06970df4aaa4}">
+      <Implementation>
+        <ST><![CDATA[CASE seqEnableT OF
+	INIT:
+	seqEnableT:=READY;
+	
+	READY:
+	IF EnableTrack THEN
+		FOR t:=0 TO MAX_TRACK DO
+			XpTrack[t].Enable(commandFeedback:=0);
+		END_FOR
+		seqEnableT:=DONE;
+	END_IF
+	DONE:
+	
+END_CASE]]></ST>
+      </Implementation>
+    </Action>
+    <Action Name="callEnableUtility" Id="{bf60f9d6-b106-4d4f-8187-2ad3e8aa2483}">
+      <Implementation>
+        <ST><![CDATA[CASE seqEnableUtility OF
+	
+INIT:
+	seqEnableUtility:=READY;	
+
+READY:
+	IF EnableUtility THEN
+    	seqEnableUtility :=BUSY;
+	END_IF
+		
+BUSY:
+	resultIniU:=FbEnv.Init(bExecute:=TRUE );
+	IF resultIniU THEN
+		FbEnv.Init(bExecute:=FALSE );
+		IpXpu:=FbEnv.TcIoXpu(nNum:= 1);
+		seqEnableUtility:=DONE;
+	END_IF
+	
+DONE:
+	IF NOT EnableUtility THEN
+	   seqEnableUtility:=READY;
+	END_IF
+
+ERROR:
+	IF NOT EnableUtility THEN
+	   seqEnableUtility:=READY;
+	END_IF
+
+ABORT:
+	IF NOT EnableUtility THEN
+	   seqEnableUtility:=READY;
+	END_IF
+		
+END_CASE
+
+]]></ST>
+      </Implementation>
+    </Action>
+    <Action Name="CallHalt" Id="{2c0f781f-0ffd-42c3-918d-14b15b21efcd}">
+      <Implementation>
+        <ST><![CDATA[CASE seqHaltM[i] OF
+
+INIT:
+	seqHaltM[i]:=READY;
+
+READY:
+	IF HaltM[i]THEN
+		Xpmover[i].Halt(commandFeedback:=XpFeedBack[i].sName.CallHalt , 
+				constraint:=0 );
+		seqHaltM[i]:=BUSY;
+	END_IF
+
+BUSY:
+	IF xpFeedback[i].sName.CallHalt.Done THEN
+		HaltM[i]:=FALSE;
+		seqHaltM[i]:=DONE;
+	END_IF
+
+DONE:
+	IF NOT HaltM[i] THEN
+	   seqHaltM[i]:=READY;
+	END_IF
+	
+END_CASE
+]]></ST>
+      </Implementation>
+    </Action>
+    <Action Name="callJoinTrack" Id="{c67c8d3d-49ce-4ca0-8f60-278a3225dace}">
+      <Implementation>
+        <ST><![CDATA[CASE seqJoinTrack[i] OF
+
+INIT:
+	seqJoinTrack[i]:=READY;	
+
+READY:
+	fbStateTrack[i].bstart:=FALSE;
+	IF JoinTrack[i]THEN
+		JoinTrack[i]:=FALSE;
+		ConstraintXY[i].SetValuesVADJ(V:=velocity_xy[i] , A:=800 , D:=900 , J:=5000 );
+	 	Xpmover[i].JoinTrack(commandFeedback:=xpFeedback[i].sName.CallJoinTrack , 
+                          targetTrack:= XpTrack[numbertrack[i]],
+                           constraint:= ConstraintXY[i],
+                           options:=0 );
+		seqJoinTrack[i]:=BUSY;
+	END_IF	
+		
+BUSY:
+	IF XpFeedback[i].sName.CallJoinTrack.Done THEN
+		seqJoinTrack[i]:=DONE;
+    ELSIF Xpfeedback[i].sName.CallJoinTrack.Aborted THEN
+		seqJoinTrack[i]:=ABORT;
+	ELSIF Xpfeedback[i].sName.CallJoinTrack.Error THEN	
+		seqJoinTrack[i]:=ERROR;
+	END_IF
+	
+DONE:
+	IF NOT JoinTrack[i] THEN
+		fbStateTrack[i].bstart:=TRUE;
+		gvl.bBusyA:=FALSE;
+		gvl.bBusyB:=FALSE;
+		gvl.bDoneA:=FALSE;
+		gvl.bDoneB:=FALSE;
+	   seqJoinTrack[i]:=READY;
+	END_IF
+
+ERROR:
+	IF NOT JoinTrack[i] THEN
+	   seqJoinTrack[i]:=READY;
+	END_IF
+
+ABORT:
+	IF NOT JoinTrack[i] THEN
+	   seqJoinTrack[i]:=READY;
+	END_IF
+		
+END_CASE]]></ST>
+      </Implementation>
+    </Action>
+    <Action Name="callLeaveTrack" Id="{a0944a54-ab26-4060-a732-a70085abf892}">
+      <Implementation>
+        <ST><![CDATA[CASE seqLeaveTrack[i] OF
+
+INIT:
+	seqLeaveTrack[i]:=READY;	
+
+READY:
+	IF LeaveTrack[i]THEN
+		ConstraintXY[i].SetValuesVADJ(
+			V:=velocity_xy[i],
+			A:=20000,
+			D:=20000,
+			J:=200000 );
+		PositionXYC[i].SetValuesXYC(
+			x:=PositionTargetX[i], 
+            y:=PositionTargetY[i], 
+            c:=PositionTargetC[i]);
+		Xpmover[i].LeaveTrack(
+			commandFeedback:=xpFeedback[i].sName.CallLeaveTrack,
+				targetPosition:=PositionXYC[i] , 
+				constraint:= ConstraintXY[i],
+				options:=0 );
+		seqLeaveTrack[i]:=BUSY;
+	END_IF
+		
+BUSY:
+    IF XpFeedback[i].sName.CallLeaveTrack.Done THEN
+		seqLeaveTrack[i]:=DONE;
+    ELSIF Xpfeedback[i].sName.CallLeaveTrack.Aborted THEN
+		seqLeaveTrack[i]:=ABORT;
+	ELSIF Xpfeedback[i].sName.CallLeaveTrack.Error THEN	
+		seqLeaveTrack[i]:=ERROR;
+	END_IF
+	
+DONE:
+	IF NOT LeaveTrack[i] THEN
+	   seqLeaveTrack[i]:=READY;
+	END_IF
+	
+ERROR:
+	IF NOT LeaveTrack[i] THEN
+	   seqLeaveTrack[i]:=READY;
+	END_IF
+	
+ABORT:
+	IF NOT LeaveTrack[i] THEN
+	   seqLeaveTrack[i]:=READY;
+	END_IF
+		
+END_CASE
+
+]]></ST>
+      </Implementation>
+    </Action>
+    <Action Name="callMoveA" Id="{974687bd-b75c-4fba-bb55-342d1a0f7503}">
+      <Implementation>
+        <ST><![CDATA[CASE seqMoveAM[i] OF
+	
+INIT:
+	seqMoveAM[i]:=READY;
+	Constratint_ZABC[i].SetLimit(
+		Coordinate:= Coord_Mcs_A1, 
+		V:= 100 , 
+		A:= 100 , 
+		D:= 100, 
+		J:= 1000);
+	
+READY:
+	IF moveAM[i]THEN
+		MoveAM[i] := FALSE;
+		Constratint_ZABC[i].AddLimit(
+			Coordinate:= Coord_Mcs_A1, 
+			V:= 100 , 
+			A:= 100 , 
+			D:= 100, 
+			J:= 1000);
+		Xpmover[i].MoveA(
+			commandFeedback:=xpFeedback[i].sName.CallMoveA , 
+			targetPosition:=positionTargetA[i] , 
+			constraint:=ConstraTINT_zabc[i]);
+		seqMoveAM[i]:=BUSY;
+	END_IF
+		
+BUSY:
+    IF XpFeedback[i].sName.CallMoveA.Done THEN
+		seqMoveAM[i]:=DONE;
+    ELSIF Xpfeedback[i].sName.CallMoveA.Aborted THEN
+		seqMoveAM[i]:=ABORT;
+	ELSIF Xpfeedback[i].sName.CallMoveA.Error THEN	
+		seqMoveAM[i]:=ERROR;
+	END_IF
+	
+DONE:
+	IF NOT MoveAM[i] THEN
+	   seqMoveAM[i]:=READY;
+	END_IF
+		
+ERROR:
+	IF NOT MoveAM[i] THEN
+	   seqMoveAM[i]:=READY;
+	END_IF
+
+ABORT:
+	IF NOT MoveAM[i] THEN
+	   seqMoveAM[i]:=READY;
+	END_IF
+		
+END_CASE
+
+]]></ST>
+      </Implementation>
+    </Action>
+    <Action Name="callMoveB" Id="{eb22cea2-1eab-4dc7-b6b0-de82f900bad4}">
+      <Implementation>
+        <ST><![CDATA[CASE seqMoveBM[i] OF
+	
+INIT:
+	seqMoveBM[i]:=READY;
+	Constratint_ZABC[i].SetLimit(
+		Coordinate:= Coord_Mcs_B1, 
+		V:= 100 , 
+		A:= 100 , 
+		D:= 100, 
+		J:= 1000);
+	
+ READY:
+	IF moveBM[i]THEN
+		MoveBM[i] := FALSE;
+		Constratint_ZABC[i].AddLimit(
+			Coordinate:= Coord_Mcs_B1, 
+			V:= 100 , 
+			A:= 100 , 
+			D:= 100, 
+			J:= 1000);
+		Xpmover[i].MoveB(
+			commandFeedback:=xpFeedback[i].sName.CallMoveB , 
+			targetPosition:=positionTargetB[i] , 
+			constraint:=ConstraTINT_zabc[i]);
+		seqMoveBM[i]:=BUSY;
+	END_IF
+
+BUSY:
+	IF XpFeedback[i].sName.CallMoveA.Done THEN
+		seqMoveBM[i]:=DONE;
+	ELSIF Xpfeedback[i].sName.CallMoveB.Aborted THEN
+		seqMoveBM[i]:=ABORT;
+	ELSIF Xpfeedback[i].sName.CallMoveB.Error THEN	
+		seqMoveBM[i]:=ERROR;
+	END_IF
+	
+DONE:
+	IF NOT MoveBM[i] THEN
+	   seqMoveBM[i]:=READY;	   
+	END_IF
+	
+ERROR:
+	IF NOT MoveBM[i] THEN
+	   seqMoveBM[i]:=READY;
+	END_IF
+	
+ABORT:
+	IF NOT MoveBM[i] THEN
+	   seqMoveBM[i]:=READY;
+	END_IF
+		
+END_CASE
+
+]]></ST>
+      </Implementation>
+    </Action>
+    <Action Name="callMoveC" Id="{30618a8b-c32a-4ed8-8c5e-234d3c2b3188}">
+      <Implementation>
+        <ST><![CDATA[CASE seqMoveCM[i] OF
+	
+INIT:
+	seqMoveCM[i]:=READY;
+	Constratint_ZABC[i].SetLimit(
+		Coordinate:= Coord_Mcs_C1, 
+		V:= 100 , 
+		A:= 100 , 
+		D:= 100, 
+		J:= 1000);
+	
+READY:
+	IF moveCM[i]THEN
+		MoveCM[i] := FALSE;
+		Constratint_ZABC[i].SetLimit(
+			Coordinate:= Coord_Mcs_C1, 
+			V:= velocity_c[i],
+			A:= 7000 , 
+			D:= 7000, 
+			J:= 35000);
+		Xpmover[i].MoveC(
+			commandFeedback:= Xpfeedback[i].sName.CallMoveC,
+			targetPosition:=positionTargetC[i] , 
+			constraint:=Constratint_ZABC[i] , options:=0 );
+		seqMoveCM[i]:=BUSY;
+	END_IF
+		
+		
+BUSY:
+	IF XpFeedback[i].sName.CallMoveC.Done THEN
+		seqMoveCM[i]:=DONE;
+	ELSIF Xpfeedback[i].sName.CallMoveC.Aborted THEN
+		seqMoveCM[i]:=ABORT;
+	ELSIF Xpfeedback[i].sName.CallMoveC.Error THEN	
+		seqMoveCM[i]:=ERROR;
+	END_IF
+	
+DONE:
+	IF NOT MoveCM[i] THEN
+	   seqMoveCM[i]:=READY;	   
+	END_IF
+	
+ERROR:
+	IF NOT MoveCM[i] THEN
+	   seqMoveCM[i]:=READY;
+	END_IF
+	
+ABORT:
+	IF NOT MoveCM[i] THEN
+	   seqMoveCM[i]:=READY;
+	END_IF
+		
+END_CASE
+
+]]></ST>
+      </Implementation>
+    </Action>
+    <Action Name="callMoveOnTrack" Id="{80783c53-fae1-4c04-bb59-33560449dea4}">
+      <Implementation>
+        <ST><![CDATA[CASE seqMoveOnTrack[i] OF
+
+INIT:
+	seqMoveOnTrack[i]:=READY;	
+
+READY:
+	IF MoveOnTrack[i]THEN
+		ConstraintXY[i].SetValuesVADJ(
+			V:=velocity_xy[i],
+			A:=1000,
+			D:=3000,
+			J:=10000);
+	 	Xpmover[i].MoveOnTrack(
+				commandFeedback:=xpFeedback[i].sName.CallMoveOnTrack, 
+				targetTrack:=XpTrack[numberTrack[i]], 
+				targetPositionOnTrack:=distanceTrack[i], 
+				constraint:= ConstraintXY[i], 
+				options:=0);	
+		seqMoveOnTrack[i]:=BUSY;
+	END_IF
+		
+BUSY:
+    IF XpFeedback[i].sName.CallMoveOnTrack.Done THEN
+		seqMoveOnTrack[i]:=DONE;
+    ELSIF Xpfeedback[i].sName.CallMoveOnTrack.Aborted THEN
+		seqMoveOnTrack[i]:=ABORT;
+	ELSIF Xpfeedback[i].sName.CallMoveOnTrack.Error THEN	
+		seqMoveOnTrack[i]:=ERROR;
+	END_IF
+	
+DONE:
+	IF NOT MoveOnTrack[i] THEN
+	   seqMoveOnTrack[i]:=READY;
+	END_IF
+	
+ERROR:
+	IF NOT MoveOnTrack[i] THEN
+	   seqMoveOnTrack[i]:=READY;
+	END_IF
+	
+ABORT:
+	IF NOT MoveOnTrack[i] THEN
+	   seqMoveOnTrack[i]:=READY;
+	END_IF
+		
+END_CASE
+
+]]></ST>
+      </Implementation>
+    </Action>
+    <Action Name="callMoveX" Id="{1e4a30a4-dd35-42a2-a111-2eb1a20dd7a1}">
+      <Implementation>
+        <ST><![CDATA[CASE seqMoveXM[i] OF
+	
+INIT:
+	seqMoveXM[i]:=READY;
+	
+READY:
+	 IF MoveXM[i]THEN
+		MoveXM[i] := FALSE;
+		ConstraintXY[i].SetValuesVADJ(V:=velocity_xy[i] ,
+						A:=Acc_xy[i] , D:=Acc_xy[i] , J:=Jark_xy[i] );
+	 
+		Xpmover[i].MoveX(commandFeedback:=xpFeedback[i].sName.CallMoveX ,
+			targetPosition:= positionTargetX[i] , 
+			refSys:=Xpmover[i].MCTOPLC.SET.PhysicalAreaID , 
+			constraint:=ConstraintXY[i]);
+		seqMoveXM[i]:=BUSY;
+	END_IF
+	
+BUSY:
+	IF XpFeedback[i].sName.CallMoveX.Done THEN
+		seqMoveXM[i]:=DONE;
+	ELSIF Xpfeedback[i].sName.CallMoveX.Aborted THEN
+		seqMoveXM[i]:=ABORT;
+	ELSIF Xpfeedback[i].sName.CallMoveX.Error THEN	
+		seqMoveXM[i]:=ERROR;
+	END_IF
+
+DONE:
+	IF NOT MoveXM[i] THEN
+	   seqMoveXM[i]:=READY;
+	END_IF
+
+ERROR:
+	IF NOT MoveXM[i] THEN
+	   seqMoveXM[i]:=READY;
+	END_IF
+
+ABORT:
+	IF NOT MoveXM[i] THEN
+	   seqMoveXM[i]:=READY;
+	END_IF
+	
+END_CASE
+
+]]></ST>
+      </Implementation>
+    </Action>
+    <Action Name="callMoveX_2m" Id="{189e2021-93a3-4a22-aa23-6f1ff8748319}">
+      <Implementation>
+        <ST><![CDATA[//MoveX2m
+(*
+	CASE seqMoveX_2m OF
+		INIT:
+        seqMoveX_2m:=READY;	
+	 READY:
+	 IF MoveX_2m THEN
+	ConstraintXY[i].SetValuesVADJ(V:=velocity_xy[i] , A:=15000 , D:=15000 , J:=100000 );
+	 
+		Xpmover[i].MoveX(commandFeedback:=xpFeedback[i][14] , targetPosition:= positionTargetX[i] , refSys:=Xpmover[i].MCTOPLC.SET.PhysicalAreaID , 
+         constraint:=ConstraintXY[i] );
+		seqMoveX_2m:=BUSY;
+		
+		Xpmover[i].MoveX(commandFeedback:=xpFeedback[i][14], targetPosition:= positionTargetX[i] , refSys:=Xpmover[i].MCTOPLC.SET.PhysicalAreaID , 
+         constraint:=ConstraintXY[i] );
+		seqMoveX_2m:=BUSY;
+		
+		
+		END_IF
+		
+		
+		
+   BUSY:
+    IF  XpFeedback[0][14].Done THEN
+		seqMoveX_2m:=DONE;
+    ELSIF Xpfeedback[0][14].Aborted THEN
+		seqMoveX_2m:=ABORT;
+	ELSIF Xpfeedback[0][14].Error THEN	
+		seqMoveX_2m:=ERROR;
+	END_IF
+		//
+	
+		DONE:
+		IF NOT MoveX_2m THEN
+	       seqMoveX_2m:=READY;
+		END_IF
+		
+		ERROR:
+		IF NOT MoveX_2m THEN
+	       seqMoveX_2m:=READY;
+		END_IF
+		
+		ABORT:
+		IF NOT MoveX_2m THEN
+	       seqMoveX_2m:=READY;
+		END_IF
+		
+	END_CASE
+	*)
+
+]]></ST>
+      </Implementation>
+    </Action>
+    <Action Name="callMoveY" Id="{966b1054-fbb0-4f1e-9add-da343ca5a76c}">
+      <Implementation>
+        <ST><![CDATA[CASE seqMoveYM[i] OF
+
+INIT:
+	seqMoveYM[i]:=READY;	
+
+READY:
+	IF MoveYM[i]THEN
+		MoveYM[i] := FALSE;
+		ConstraintXY[i].SetValuesVADJ(
+			V:=velocity_xy[i] ,A:=Acc_xy[i] , D:=Acc_xy[i] , J:=Jark_xy[i] );
+	 
+		Xpmover[i].MoveY(
+			commandFeedback:=xpFeedback[i].sName.CallMoveY,
+			targetPosition:= positionTargetY[i],
+			refSys:=Xpmover[i].MCTOPLC.SET.PhysicalAreaID, 
+			constraint:=ConstraintXY[i] );
+		seqMoveYM[i]:=BUSY;
+	END_IF
+	
+BUSY:
+	IF XpFeedback[i].sName.CallMoveY.Done THEN
+		seqMoveYM[i]:=DONE;
+	ELSIF Xpfeedback[i].sName.CallMoveY.Aborted THEN
+		seqMoveYM[i]:=ABORT;
+	ELSIF Xpfeedback[i].sName.CallMoveY.Error THEN	
+		seqMoveYM[i]:=ERROR;
+	END_IF
+
+DONE:
+	IF NOT MoveYM[i] THEN
+	   seqMoveYM[i]:=READY;
+	END_IF
+
+ERROR:
+	IF NOT MoveYM[i] THEN
+	   seqMoveYM[i]:=READY;
+	END_IF
+
+ABORT:
+	IF NOT MoveYM[i] THEN
+	   seqMoveYM[i]:=READY;
+	END_IF
+	
+END_CASE]]></ST>
+      </Implementation>
+    </Action>
+    <Action Name="callMoveZ" Id="{5912fd16-bb08-481c-aca5-5b7332759a0d}">
+      <Implementation>
+        <ST><![CDATA[CASE seqMoveZM[i] OF
+
+INIT:
+	seqMoveZM[i]:=READY;
+	Constratint_ZABC[i].SetLimit(
+		Coordinate:= Coord_Mcs_A1, 
+		V:= 100 , 
+		A:= 100 , 
+		D:= 100, 
+		J:= 1000);
+	
+READY:
+	IF moveZM[i]THEN
+		MoveZM[i] := FALSE;	
+		Constratint_ZABC[i].AddLimit(
+			Coordinate:= Coord_Mcs_A1, 
+			V:= 100 , 
+			A:= 100 , 
+			D:= 100, 
+			J:= 1000);
+		Xpmover[i].MoveZ(
+			commandFeedback:=xpFeedback[i].sName.CallMoveZ , 
+			targetPosition:=positionTargetZ[i] , 
+			constraint:=ConstraTINT_zabc[i]);
+		seqMoveZM[i]:=BUSY;
+	END_IF
+		
+BUSY:
+    IF XpFeedback[i].sName.CallMoveZ.Done THEN
+		seqMoveZM[i]:=DONE;
+    ELSIF Xpfeedback[i].sName.CallMoveZ.Aborted THEN
+		seqMoveZM[i]:=ABORT;
+	ELSIF Xpfeedback[i].sName.CallMoveZ.Error THEN	
+		seqMoveZM[i]:=ERROR;
+	END_IF
+	
+DONE:
+	IF NOT MoveZM[i] THEN
+	   seqMoveZM[i]:=READY;
+	END_IF
+	
+ERROR:
+	IF NOT MoveZM[i] THEN
+	   seqMoveZM[i]:=READY;
+	END_IF
+	
+ABORT:
+	IF NOT MoveZM[i] THEN
+	   seqMoveZM[i]:=READY;
+	END_IF
+		
+END_CASE
+
+]]></ST>
+      </Implementation>
+    </Action>
+    <Action Name="CallReset" Id="{828a4503-afb1-47e9-ae13-1d648590f200}">
+      <Implementation>
+        <ST><![CDATA[CASE seqResetM[i] OF
+	
+INIT:
+	seqResetM[i]:=READY;
+
+READY:
+	IF ResetM[i]THEN
+		Xpmover[i].Reset(commandFeedback:=XpFeedBack[i].sName.CallReset);
+		seqResetM[i]:=BUSY;
+	END_IF
+		
+BUSY:
+	IF xpFeedback[i].sName.CallReset.Done THEN
+		ResetM[i]:=FALSE;
+		seqResetM[i]:=DONE;
+	END_IF
+		
+DONE:
+	IF NOT ResetM[i] THEN
+		seqResetM[i]:=READY;
+	END_IF
+
+END_CASE
+]]></ST>
+      </Implementation>
+    </Action>
+    <Action Name="seq_JoinTrack" Id="{a8fc712c-0239-442a-a002-ee8d18045139}">
+      <Implementation>
+        <ST><![CDATA[IF NOT bJoinTrackseq THEN
+	FOR i :=0 TO 1(*GVL.MAX_MOVER*) DO
+			pSortedMovers[i] := ADR(Xpmover[i]);
+		END_FOR
+		
+	FOR i := 0 TO 1(*GVL.MAX_MOVER*)-1 DO
+		FOR j := i+1 TO  1(*GVL.MAX_MOVER*) DO
+			IF pSortedMovers[i]^.MCTOPLC.ACT.ActPos.x > pSortedMovers[j]^.MCTOPLC.ACT.ActPos.x THEN
+				pTemp := pSortedMovers[i];
+				pSortedMovers[i] := pSortedMovers[j];
+				pSortedMovers[j] := ptemp;
+			END_IF
+		END_FOR
+	END_FOR
+	pMover_1st  := pSortedMovers[0];
+	pMover_2nd	:= pSortedMovers[1];
+END_IF
+
+FOR i:=0 TO gvl.MAX_MOVER DO
+		ConstraintXY[i].SetValuesVADJ(V:=velocity_xy[i] , A:=15000 , D:=15000 , J:=100000 );
+		velocity_xy[i] := 50;
+END_FOR
+	
+CASE nJoinStep OF
+	0:
+	IF bJoinTrackseq THEN
+		bJoinTrackseq := FALSE;
+		nJoinStep := 10;
+	END_IF
+
+	10:
+	pMover_1st^.JoinTrack(commandFeedback:= Xpfeedback[0].sName.SeqJoinTrack,
+			targetTrack := XpTrack[E_TrackName.Wait],
+			constraint	:= constraintXY[0],
+			options := 0);
+	IF Xpfeedback[0].sName.SeqJoinTrack.Busy THEN
+		nJoinStep := 20;
+	END_IF
+	
+	20:
+	IF Xpfeedback[0].sName.SeqJoinTrack.Done THEN
+		nJoinStep := 30;
+	END_IF
+	
+	30:
+	pMover_2nd^.JoinTrack(commandFeedback:= Xpfeedback[1].sName.SeqJoinTrack,
+		targetTrack := XpTrack[E_TrackName.ToFillB],
+		constraint	:= constraintXY[1],
+		options := 0);
+	IF Xpfeedback[1].sName.SeqJoinTrack.Busy THEN
+		nJoinStep := 40;
+	END_IF
+
+	40:
+	IF Xpfeedback[1].sName.SeqJoinTrack.Done THEN
+		nJoinStep := 50;
+	END_IF
+
+END_CASE
+(*
+FOR i:=0 TO GVL.MAX_MOVER DO
+	IF xpMover[i].MCTOPLC.STD.CommandMode <> MC.MC_PLANAR_MOVER_COMMAND_MODE.JoiningTrack THEN
+		fbStateTrack[i].bstart := TRUE;
+	ELSE
+		fbStateTrack[i].bstart := FALSE;
+	END_IF
+END_FOR
+*)
+
+IF GVL.bfill THEN
+	GVL.bfill  := FALSE;
+END_IF
+
+diCountSum := 0;
+FOR i:=0 TO GVL.MAX_MOVER DO
+	diCountSum := diCountSum + fbStateTrack[i].icount;
+END_FOR
+
+IF CountReset THEN
+	CountReset := FALSE;
+	FOR i:=0 TO GVL.MAX_MOVER DO
+		fbStateTrack[i].breset := TRUE;
+	END_FOR
+END_IF]]></ST>
+      </Implementation>
+    </Action>
+    <Action Name="update" Id="{b905cfd4-917c-4c0a-aedb-a2dd8d9f08d9}">
+      <Implementation>
+        <ST><![CDATA[FOR i:=0 TO gvl.MAX_MOVER DO //xpmover 
+	XpMover[i].update();
+	FOR k:=0 TO MAX_FEEDBACK DO	
+		Xpfeedback[i].aArray[k].Update();
+	END_FOR
+END_FOR
+
+FOR t:=0 TO MAX_TRACK DO
+    XpTrack[t].Update();
+END_FOR]]></ST>
+      </Implementation>
+    </Action>
+  </POU>
+</TcPlcObject>

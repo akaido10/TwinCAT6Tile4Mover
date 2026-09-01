@@ -1,0 +1,50 @@
+<?xml version="1.0"?>
+<TcLicenseInfo xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.beckhoff.com/schemas/2011/11/TcLicenseInfo">
+	<LicenseInfo>
+		<SystemId>{1D993DC2-E447-CC3D-D73E-A96EF01DD1DE}</SystemId>
+		<IssueTime>2026-08-25T03:57:00</IssueTime>
+		<ExpireTime>2026-09-02T00:00:00</ExpireTime>
+		<LicenseKey>dcd1adf0e87ace7abd19a79759d64234ed19c3c82c7428c98cbbb8d8310ba345132085906072c76d07bd34c3aa617b189b60f560477d56821fbe6600031731cd11ed9ae117a75c6b45d06e651ad3636aff03ddd63ec9814f3e71522cd42a6493209f212ce4ff159a2594966e2f11d9f4e8c314471184ee505cc6738e00f1223efe79f982ef481d75f09d99d79fa836144dc30b5716ac2223510b68ac081029080dd8400134fb11afe3853d52ea0370cd5b2f7f2387c620a974b1bf436c9fb26d4ecd4cf58540c1f916f82417572ae9788bd447645aac61a858d7735b443e7c275216f8f8767394402aa24b9826f6580c754644f572dc9d81dc4a55743fca8d00</LicenseKey>
+		<License>
+			<LicenseId>{081AC839-28D0-49CA-9792-72680E1F3249}</LicenseId>
+			<Name>TC3 TCP/UDP RT</Name>
+			<OrderNo>TF6311</OrderNo>
+		</License>
+		<License>
+			<LicenseId>{AE83F222-BB78-448F-BDED-7494A70CD776}</LicenseId>
+			<Name>TC3 EtherNet/IP Adapter (Slave)</Name>
+			<OrderNo>TF6280</OrderNo>
+			<Instances>1</Instances>
+		</License>
+		<License>
+			<LicenseId>{C93D4D9B-FB43-43A4-8D9E-5F885F636D83}</LicenseId>
+			<Name>TC3 MC3 Multi Vendor</Name>
+			<Instances>5</Instances>
+		</License>
+		<License>
+			<LicenseId>{577D032C-921A-4978-B163-B35640A4CFE6}</LicenseId>
+			<Name>TC3 MC3 Axis</Name>
+			<Instances>10</Instances>
+		</License>
+		<License>
+			<LicenseId>{C2F58FAE-EB3E-4252-A3D4-E912569E6EFC}</LicenseId>
+			<Name>TC3 Planar Motion Base</Name>
+			<OrderNo>TF5430</OrderNo>
+		</License>
+		<License>
+			<LicenseId>{C13CAEC7-1F41-4491-935E-FF6254005C74}</LicenseId>
+			<Name>TC3 Physics Base</Name>
+			<OrderNo>TF5440</OrderNo>
+		</License>
+		<License>
+			<LicenseId>{5CFA659E-6740-4567-A7FB-C2676C278AAE}</LicenseId>
+			<Name>TC3 MC3 Base</Name>
+			<OrderNo>TF5500</OrderNo>
+		</License>
+		<License>
+			<LicenseId>{C362DA3A-1771-4019-9AF9-F39972E4A76D}</LicenseId>
+			<Name>TC3 XPlanar Technology</Name>
+			<OrderNo>TF5890</OrderNo>
+		</License>
+	</LicenseInfo>
+</TcLicenseInfo>
